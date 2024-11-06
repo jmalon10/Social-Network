@@ -1,13 +1,19 @@
 import mongoose from 'mongoose';
-import { User, Thought } from '../models';
-import { users, thoughts } from './data';
+import { User, Thought } from '../models/index.js';
+import { users, thoughts } from './data.js';
+
+const dbUrl = 'mongodb://localhost:27017/Social';
 
 const seedDatabase = async () => {
   try {
     // Connect to the database
-    await mongoose.connect('mongodb://localhost:27017/Social', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    await mongoose.connect(dbUrl)
+    .then(() => {
+      console.log('Database connected successfully!');
+      // Your seeding logic here
+    })
+    .catch(err => {
+      console.error('Database connection error:', err);
     });
 
     console.log('Connected to MongoDB.');

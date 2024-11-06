@@ -1,32 +1,25 @@
-// models/Thought.ts
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-// Define Reaction Schema
+// Reaction Schema
 const reactionSchema = new Schema({
   reactionId: {
     type: Schema.Types.ObjectId,
-    default: () => new mongoose.Types.ObjectId()
+    default: () => new mongoose.Types.ObjectId(),
   },
   reactionBody: {
     type: String,
     required: true,
-    maxlength: 280
+    maxlength: 280,
   },
   username: {
     type: String,
-    required: true
+    required: true,
   },
   createdAt: {
     type: Date,
     default: Date.now,
-    get: (timestamp: Date) => timestamp.toLocaleString()
-  }
-},
-{
-  toJSON: {
-    getters: true
+    get: (timestamp: any) => timestamp.toString(), // Use `toString()` if `toLocaleString()` is not working
   },
-  id: false
 });
 
 interface IThought extends Document {
@@ -37,36 +30,40 @@ interface IThought extends Document {
   reactionCount: number;
 }
 
-const thoughtSchema = new Schema<IThought>({
-  thoughtText: {
-    type: String,
-    required: true,
-    minlength: 1,
-    maxlength: 280
+const thoughtSchema = new Schema<IThought>(
+  {
+    thoughtText: {
+      type: String,
+      required: true,
+      minlength: 1,
+      maxlength: 280,
+    },
+    createdAt: {
+      type: Schema.Types.Date,
+      default: Date.now,
+      get: (timestamp: any) => timestamp.toString(),
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    reactions: [reactionSchema],
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    get: (timestamp: Date) => timestamp.toLocaleString()
-  },
-  username: {
-    type: String,
-    required: true
-  },
-  reactions: [reactionSchema]
-},
-{
-  toJSON: {
-    virtuals: true,
-    getters: true
-  },
-  id: false
-});
+  {
+    toJSON: {
+      virtuals: true,
+      getters: true,
+    },
+    id: false,
+  }
+);
 
-// Virtual property to get reaction count
-thoughtSchema.virtual('reactionCount').get(function(this: IThought) {
+// Virtual for reactionCount
+thoughtSchema.virtual('reactionCount').get(function (this: IThought) {
   return this.reactions.length;
 });
 
 const Thought = mongoose.model<IThought>('Thought', thoughtSchema);
 export default Thought;
+
+
