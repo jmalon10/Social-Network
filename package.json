@@ -8,7 +8,8 @@
     "build": "npx tsc",
     "start": "npm run build && node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node dist/seeds/seed.js"
+    "seed": "node dist/seeds/seed.js",
+    "start-all": "npm i && npm run build && npm run seed && npm run start"
   },
   "keywords": [],
   "author": "",
