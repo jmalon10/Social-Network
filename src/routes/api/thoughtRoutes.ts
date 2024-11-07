@@ -1,15 +1,19 @@
 import { Router } from 'express';
-import Thought from '../../models/Thought';  // Adjust to your Thought model location
+import Thought from '../../models/Thought.js';
 
-export const thoughtRouter = Router();
+const thoughtRouter = Router();
 
 // GET all thoughts
-thoughtRouter.get('/', async (_req, res) => {
+thoughtRouter.get('/', async (_, res) => {
   try {
     const thoughts = await Thought.find();
-    res.json(thoughts);
+    return res.json(thoughts);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (err instanceof Error) {
+      return res.status(500).json({ message: err.message });
+    } else {
+      return res.status(500).json({ message: 'An unexpected error occurred' });
+    }
   }
 });
 
@@ -17,32 +21,48 @@ thoughtRouter.get('/', async (_req, res) => {
 thoughtRouter.get('/:thoughtId', async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.thoughtId);
-    if (!thought) return res.status(404).json({ message: 'Thought not found' });
-    res.json(thought);
+    if (!thought) {
+      return res.status(404).json({ message: 'Thought not found' });
+    }
+    return res.json(thought);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (err instanceof Error) {
+      return res.status(500).json({ message: err.message });
+    } else {
+      return res.status(500).json({ message: 'An unexpected error occurred' });
+    }
   }
 });
 
 // POST a new thought
 thoughtRouter.post('/', async (req, res) => {
   try {
-    const thought = new Thought(req.body);  // Assuming req.body contains valid thought data
+    const thought = new Thought(req.body);
     await thought.save();
-    res.status(201).json(thought);
+    return res.status(201).json(thought);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    if (err instanceof Error) {
+      return res.status(400).json({ message: err.message });
+    } else {
+      return res.status(500).json({ message: 'An unexpected error occurred' });
+    }
   }
 });
 
-// PUT update a thought by ID
+// PUT to update a thought by ID
 thoughtRouter.put('/:thoughtId', async (req, res) => {
   try {
     const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, req.body, { new: true });
-    if (!thought) return res.status(404).json({ message: 'Thought not found' });
-    res.json(thought);
+    if (!thought) {
+      return res.status(404).json({ message: 'Thought not found' });
+    }
+    return res.json(thought);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    if (err instanceof Error) {
+      return res.status(400).json({ message: err.message });
+    } else {
+      return res.status(500).json({ message: 'An unexpected error occurred' });
+    }
   }
 });
 
@@ -50,41 +70,61 @@ thoughtRouter.put('/:thoughtId', async (req, res) => {
 thoughtRouter.delete('/:thoughtId', async (req, res) => {
   try {
     const thought = await Thought.findByIdAndDelete(req.params.thoughtId);
-    if (!thought) return res.status(404).json({ message: 'Thought not found' });
-    res.json({ message: 'Thought deleted' });
+    if (!thought) {
+      return res.status(404).json({ message: 'Thought not found' });
+    }
+    return res.json({ message: 'Thought deleted' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (err instanceof Error) {
+      return res.status(500).json({ message: err.message });
+    } else {
+      return res.status(500).json({ message: 'An unexpected error occurred' });
+    }
   }
 });
 
-// POST add a reaction to a thought
+// POST a reaction to a thought
 thoughtRouter.post('/:thoughtId/reactions', async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.thoughtId);
-    if (!thought) return res.status(404).json({ message: 'Thought not found' });
-
-    // Add reaction
-    thought.reactions.push(req.body);  // Assuming req.body contains valid reaction data
+    if (!thought) {
+      return res.status(404).json({ message: 'Thought not found' });
+    }
+    thought.reactions.push(req.body);
     await thought.save();
-    res.json(thought);
+    return res.json(thought);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (err instanceof Error) {
+      return res.status(500).json({ message: err.message });
+    } else {
+      return res.status(500).json({ message: 'An unexpected error occurred' });
+    }
   }
 });
 
-// DELETE remove a reaction from a thought
+// DELETE a reaction from a thought
 thoughtRouter.delete('/:thoughtId/reactions/:reactionId', async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.thoughtId);
-    if (!thought) return res.status(404).json({ message: 'Thought not found' });
-
-    const reactionIndex = thought.reactions.findIndex(reaction => reaction._id.toString() === req.params.reactionId);
-    if (reactionIndex === -1) return res.status(400).json({ message: 'Reaction not found' });
-
-    thought.reactions.splice(reactionIndex, 1);  // Remove reaction
+    if (!thought) {
+      return res.status(404).json({ message: 'Thought not found' });
+    }
+    const reactionIndex = thought.reactions.findIndex(
+      (reaction: any) => reaction._id.toString() === req.params.reactionId
+    );
+    if (reactionIndex === -1) {
+      return res.status(404).json({ message: 'Reaction not found' });
+    }
+    thought.reactions.splice(reactionIndex, 1);
     await thought.save();
-    res.json(thought);
+    return res.json(thought);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (err instanceof Error) {
+      return res.status(500).json({ message: err.message });
+    } else {
+      return res.status(500).json({ message: 'An unexpected error occurred' });
+    }
   }
 });
+
+export { thoughtRouter };
